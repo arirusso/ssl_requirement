@@ -6,7 +6,8 @@ module ActionDispatch
     class RouteSet
 
       # Add a secure option to the rewrite method.
-      def url_for_with_secure_option(options = {})
+      def url_for_with_secure_option(*args, &block)
+        options = args.first
         secure = options.delete(:secure)
 
         # if secure && ssl check is not disabled, convert to full url with https
@@ -30,18 +31,20 @@ module ActionDispatch
           end
         end
 
-        url_for_without_secure_option(options)
+        url_for_without_secure_option(*args, &block)
       end
 
       # if full URL is requested for http and we've been told to use a
       # non-ssl host override, then use it
-      def url_for_with_non_ssl_host(options)
+      def url_for_with_non_ssl_host(*args, &block)
+        options = args.first
         if !options[:only_path] && !SslRequirement.non_ssl_host.nil?
           if !(/^https/ =~ (options[:protocol] || @request.try(:protocol)))
             options.merge! :host => SslRequirement.non_ssl_host
           end
         end
-        url_for_without_non_ssl_host(options)
+
+        url_for_without_non_ssl_host(*args, &block)
       end
 
       # want with_secure_option to get run first (so chain it last)
